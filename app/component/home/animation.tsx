@@ -2,7 +2,7 @@
 'use client'
 
 import React from 'react'
-import lottieJson from '../../../public/Animation_main.json'
+import lottieJson from '@/public/Animation_main.json'
 import dynamic from 'next/dynamic'
 
 const Lottie = dynamic(() => import('react-lottie-player'), {
