@@ -1,12 +1,13 @@
 'use client'
+'use client'
 
 import React from 'react'
 import lottieJson from '../../../public/Animation_main.json'
-import Lottie from 'react-lottie-player'
-// Alternatively:
-// import Lottie from 'react-lottie-player/dist/LottiePlayerLight'
+import dynamic from 'next/dynamic'
 
-
+const Lottie = dynamic(() => import('react-lottie-player'), {
+  ssr: false,
+})
 
 export default function Animation() {
   return (
