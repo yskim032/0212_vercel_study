@@ -1,5 +1,7 @@
 import Head from "next/head";
 import Layout from "./component/layout";
+import Hero from "./component/home/hero";
+import Animation from "./component/home/animation";
 
 export default function Home() {
   return (
@@ -10,10 +12,13 @@ export default function Home() {
         <meta name="description" content="YS Tech" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
-      <h1 className="text-3xl font-bold underline">
-        HOME : This is YS Tech
-      </h1>
+
+      <section className="text-gray-600 body-font">
+        <div className="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
+            <Hero />
+            <Animation />
+        </div>                          
+      </section>
 
     </Layout>
   )
