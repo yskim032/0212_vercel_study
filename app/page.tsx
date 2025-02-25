@@ -1,3 +1,5 @@
+'use client'
+
 import Head from "next/head";
 import Layout from "./component/layout";
 import Hero from "./component/home/hero";
