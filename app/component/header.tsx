@@ -16,7 +16,7 @@ export default function Header() {
                     height={150}
                     className="p-2 rounded-full"
                 />
-                <span className="ml-3 text-3xl font-bold">YS Tech</span>
+                <span className="ml-3 text-3xl font-bold text-primary">YS Tech</span>
               </a>
               <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
                
