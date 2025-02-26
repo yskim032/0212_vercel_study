@@ -5,7 +5,7 @@ import Hero from "./component/home/hero";
 import Animation from "./component/home/animation";
 import { Client } from '@notionhq/client';
 import NotionData from './component/NotionData';
-import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { DatabaseObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 interface NotionProperty {
   type: string;
@@ -25,26 +25,29 @@ interface SerializedNotionPage {
 }
 
 async function getNotionData() {
-  const notion = new Client({
-    auth: process.env.NOTION_TOKEN,
-  });
+  try {
+    const notion = new Client({
+      auth: process.env.NOTION_TOKEN,
+    });
 
-  const response = await notion.databases.query({
-    database_id: process.env.NOTION_DATABASE_ID as string,
-    page_size: 100,
-  });
+    const response = await notion.databases.query({
+      database_id: process.env.NOTION_DATABASE_ID as string,
+      page_size: 100,
+    });
 
-  const serializedData: SerializedNotionPage[] = response.results
-    .filter((page): page is PageObjectResponse => 'properties' in page)
-    .map(page => ({
-      properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
+    const pages = response.results.filter((page): page is PageObjectResponse => 
+      'properties' in page && page.object === 'page'
+    );
+
+    const serializedData: SerializedNotionPage[] = pages.map(page => ({
+      properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]: [string, any]) => {
         acc[key] = {
           type: prop.type,
           ...(prop.type === 'title' && { 
-            title: prop.title?.map(t => ({ plain_text: t.plain_text })) 
+            title: prop.title?.map((t: any) => ({ plain_text: t.plain_text })) 
           }),
           ...(prop.type === 'rich_text' && { 
-            rich_text: prop.rich_text?.map(t => ({ plain_text: t.plain_text })) 
+            rich_text: prop.rich_text?.map((t: any) => ({ plain_text: t.plain_text })) 
           }),
           ...(prop.type === 'number' && { 
             number: prop.number 
@@ -53,7 +56,7 @@ async function getNotionData() {
             select: { name: prop.select?.name } 
           }),
           ...(prop.type === 'multi_select' && { 
-            multi_select: prop.multi_select?.map(s => ({ name: s.name })) 
+            multi_select: prop.multi_select?.map((s: any) => ({ name: s.name })) 
           }),
           ...(prop.type === 'date' && { 
             date: { start: prop.date?.start } 
@@ -66,7 +69,11 @@ async function getNotionData() {
       }, {})
     }));
 
-  return serializedData;
+    return serializedData;
+  } catch (error) {
+    console.error('Error fetching Notion data:', error);
+    return [];
+  }
 }
 
 export default async function Home() {
