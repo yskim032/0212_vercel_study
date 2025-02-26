@@ -20,24 +20,20 @@ interface NotionProperty {
 }
 
 interface SerializedNotionPage {
-  properties: Record<string, NotionProperty>;
+  properties: {
+    [key: string]: NotionProperty;
+  };
   cover?: {
     type: 'external';
     external: {
       url: string;
-    };
-  } | {
-    type: 'file';
-    file: {
-      url: string;
-      expiry_time: string;
     };
   } | null;
 }
 
 type NotionProperties = Record<string, NotionProperty>;
 
-async function getNotionData() {
+async function getNotionData(): Promise<SerializedNotionPage[]> {
   try {
     const notion = new Client({
       auth: process.env.NOTION_TOKEN,
@@ -52,8 +48,8 @@ async function getNotionData() {
       'properties' in page && page.object === 'page'
     );
 
-    const serializedData = pages.map(page => ({
-      properties: Object.entries(page.properties).reduce<NotionProperties>((acc, [key, prop]) => {
+    return pages.map(page => ({
+      properties: Object.entries(page.properties).reduce((acc, [key, prop]) => {
         const typedProp = prop as NotionProperty;
         
         const propertyValue = {
@@ -83,11 +79,13 @@ async function getNotionData() {
 
         acc[key] = propertyValue as NotionProperty;
         return acc;
-      }, {}),
-      cover: page.cover
+      }, {} as Record<string, NotionProperty>),
+      cover: page.cover?.type === 'external' ? {
+        type: 'external',
+        external: { url: page.cover.external.url }
+      } : null
     }));
 
-    return serializedData;
   } catch (error) {
     console.error('Error fetching Notion data:', error);
     return [];
