@@ -6,6 +6,23 @@ import Animation from "./component/home/animation";
 import { Client } from '@notionhq/client';
 import NotionData from './component/NotionData';
 
+interface NotionProperty {
+  type: string;
+  title?: { plain_text: string }[];
+  rich_text?: { plain_text: string }[];
+  number?: number;
+  select?: { name: string };
+  multi_select?: { name: string }[];
+  date?: { start: string };
+  checkbox?: boolean;
+}
+
+interface SerializedNotionPage {
+  properties: {
+    [key: string]: NotionProperty;
+  };
+}
+
 async function getNotionData() {
   const notion = new Client({
     auth: process.env.NOTION_TOKEN,
@@ -16,12 +33,10 @@ async function getNotionData() {
     page_size: 100,
   });
 
-  // 필요한 데이터만 추출하여 직렬화 가능한 형태로 변환
-  const serializedData = response.results.map(page => ({
-    properties: Object.entries(page.properties).reduce((acc, [key, prop]) => {
+  const serializedData: SerializedNotionPage[] = response.results.map(page => ({
+    properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
       acc[key] = {
         type: prop.type,
-        // 각 타입별로 필요한 데이터만 추출
         ...(prop.type === 'title' && { 
           title: prop.title?.map(t => ({ plain_text: t.plain_text })) 
         }),
@@ -45,7 +60,7 @@ async function getNotionData() {
         })
       };
       return acc;
-    }, {} as Record<string, any>)
+    }, {})
   }));
 
   return serializedData;
@@ -72,7 +87,7 @@ export default async function Home() {
       {/* Notion 데이터 섹션 추가 */}
       <section className="text-gray-600 body-font">
         <div className="container mx-auto px-5 py-24">
-          <h2 className="text-3xl font-bold text-center mb-8">Portfolio (DB ex Notion)</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Notion Data (Experimental)</h2>
           <NotionData data={data} />
         </div>
       </section>
