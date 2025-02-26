@@ -130,7 +130,19 @@ export default async function Home() {
       <section className="text-gray-600 body-font">
         <div className="container mx-auto px-5 py-24">
           <h2 className="text-3xl font-bold text-center mb-8">Notion Data (Experimental)</h2>
-          <NotionData data={data as any} />
+          <NotionData data={data as unknown as {
+            properties: {
+              Name: NotionProperty & { type: 'title'; title: Array<{ plain_text: string }> };
+              Description: NotionProperty & { type: 'rich_text'; rich_text: Array<{ plain_text: string }> };
+              [key: string]: NotionProperty;
+            };
+            cover?: {
+              type: 'external';
+              external: {
+                url: string;
+              };
+            } | null;
+          }[]} />
         </div>
       </section>
 
