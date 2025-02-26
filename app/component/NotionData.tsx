@@ -2,9 +2,20 @@
 
 import Image from 'next/image';
 
+interface NotionProperty {
+  type: string;
+  title?: Array<{ plain_text: string }>;
+  rich_text?: Array<{ plain_text: string }>;
+  multi_select?: Array<{ name: string }>;
+  date?: { start: string; end: string | null };
+  url?: string | null;
+}
+
 interface NotionDataProps {
   data: {
-    properties: Record<string, any>;
+    properties: {
+      [key: string]: NotionProperty;
+    };
     cover?: {
       type: 'external';
       external: {
@@ -35,10 +46,10 @@ export default function NotionData({ data }: NotionDataProps) {
           {/* Content */}
           <div className="p-4">
             <h3 className="text-lg font-bold mb-2">
-              {item.properties.Name?.title[0]?.plain_text || 'Untitled'}
+              {item.properties.Name?.title?.[0]?.plain_text || 'Untitled'}
             </h3>
             <p className="text-gray-600">
-              {item.properties.Description?.rich_text[0]?.plain_text || 'No description'}
+              {item.properties.Description?.rich_text?.[0]?.plain_text || 'No description'}
             </p>
           </div>
         </div>

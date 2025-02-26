@@ -14,7 +14,8 @@ interface NotionProperty {
   number?: number;
   select?: { name: string };
   multi_select?: Array<{ name: string }>;
-  date?: { start: string };
+  date?: { start: string; end: string | null };
+  url?: string | null;
   checkbox?: boolean;
 }
 
@@ -24,6 +25,12 @@ interface SerializedNotionPage {
     type: 'external';
     external: {
       url: string;
+    };
+  } | {
+    type: 'file';
+    file: {
+      url: string;
+      expiry_time: string;
     };
   } | null;
 }
@@ -45,7 +52,7 @@ async function getNotionData() {
       'properties' in page && page.object === 'page'
     );
 
-    const serializedData: SerializedNotionPage[] = pages.map(page => ({
+    const serializedData = pages.map(page => ({
       properties: Object.entries(page.properties).reduce<NotionProperties>((acc, [key, prop]) => {
         const typedProp = prop as NotionProperty;
         
@@ -67,7 +74,7 @@ async function getNotionData() {
             multi_select: typedProp.multi_select?.map(s => ({ name: s.name }))
           }),
           ...(typedProp.type === 'date' && { 
-            date: { start: typedProp.date?.start }
+            date: { start: typedProp.date?.start, end: null }
           }),
           ...(typedProp.type === 'checkbox' && { 
             checkbox: typedProp.checkbox
@@ -109,7 +116,13 @@ export default async function Home() {
       <section className="text-gray-600 body-font">
         <div className="container mx-auto px-5 py-24">
           <h2 className="text-3xl font-bold text-center mb-8">Notion Data (Experimental)</h2>
-          <NotionData data={data} />
+          <NotionData data={data.map(page => ({
+            properties: page.properties,
+            cover: page.cover?.type === 'external' ? {
+              type: 'external',
+              external: { url: page.cover.external.url }
+            } : null
+          }))} />
         </div>
       </section>
 
