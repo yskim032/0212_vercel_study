@@ -5,6 +5,7 @@ import Hero from "./component/home/hero";
 import Animation from "./component/home/animation";
 import { Client } from '@notionhq/client';
 import NotionData from './component/NotionData';
+import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 interface NotionProperty {
   type: string;
@@ -33,35 +34,37 @@ async function getNotionData() {
     page_size: 100,
   });
 
-  const serializedData: SerializedNotionPage[] = response.results.map(page => ({
-    properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
-      acc[key] = {
-        type: prop.type,
-        ...(prop.type === 'title' && { 
-          title: prop.title?.map(t => ({ plain_text: t.plain_text })) 
-        }),
-        ...(prop.type === 'rich_text' && { 
-          rich_text: prop.rich_text?.map(t => ({ plain_text: t.plain_text })) 
-        }),
-        ...(prop.type === 'number' && { 
-          number: prop.number 
-        }),
-        ...(prop.type === 'select' && { 
-          select: { name: prop.select?.name } 
-        }),
-        ...(prop.type === 'multi_select' && { 
-          multi_select: prop.multi_select?.map(s => ({ name: s.name })) 
-        }),
-        ...(prop.type === 'date' && { 
-          date: { start: prop.date?.start } 
-        }),
-        ...(prop.type === 'checkbox' && { 
-          checkbox: prop.checkbox 
-        })
-      };
-      return acc;
-    }, {})
-  }));
+  const serializedData: SerializedNotionPage[] = response.results
+    .filter((page): page is PageObjectResponse => 'properties' in page)
+    .map(page => ({
+      properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
+        acc[key] = {
+          type: prop.type,
+          ...(prop.type === 'title' && { 
+            title: prop.title?.map(t => ({ plain_text: t.plain_text })) 
+          }),
+          ...(prop.type === 'rich_text' && { 
+            rich_text: prop.rich_text?.map(t => ({ plain_text: t.plain_text })) 
+          }),
+          ...(prop.type === 'number' && { 
+            number: prop.number 
+          }),
+          ...(prop.type === 'select' && { 
+            select: { name: prop.select?.name } 
+          }),
+          ...(prop.type === 'multi_select' && { 
+            multi_select: prop.multi_select?.map(s => ({ name: s.name })) 
+          }),
+          ...(prop.type === 'date' && { 
+            date: { start: prop.date?.start } 
+          }),
+          ...(prop.type === 'checkbox' && { 
+            checkbox: prop.checkbox 
+          })
+        };
+        return acc;
+      }, {})
+    }));
 
   return serializedData;
 }
