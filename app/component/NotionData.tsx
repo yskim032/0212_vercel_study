@@ -22,6 +22,18 @@ interface NotionDataProps {
         type: 'rich_text';
         rich_text: Array<{ plain_text: string }>;
       };
+      Github: NotionProperty & {
+        type: 'url';
+        url: string | null;
+      };
+      Tag: NotionProperty & {
+        type: 'multi_select';
+        multi_select: Array<{ name: string }>;
+      };
+      WorkPeriod: NotionProperty & {
+        type: 'date';
+        date: { start: string; end: string | null };
+      };
       [key: string]: NotionProperty;
     };
     cover?: {
@@ -49,13 +61,44 @@ export default function NotionData({ data }: NotionDataProps) {
               />
             </div>
           )}
-          <div className="p-4">
+          <div className="p-4 dark:text-yellow-500">
             <h3 className="text-lg font-bold mb-2">
               {item.properties.Name?.title[0]?.plain_text || 'Untitled'}
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-2 dark:text-yellow-200">
               {item.properties.Description?.rich_text[0]?.plain_text || 'No description'}
             </p>
+            
+            {/* Work Period */}
+            <div className="text-sm text-gray-500 mb-2 dark:text-yellow-200">
+              {item.properties.WorkPeriod?.date ? (
+                `${item.properties.WorkPeriod.date.start} ~ ${item.properties.WorkPeriod.date.end || 'Present'}`
+              ) : 'Period not specified'}
+            </div>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-2">
+              {item.properties.Tag?.multi_select?.map((tag, tagIndex) => (
+                <span 
+                  key={tagIndex}
+                  className="px-2 py-1 bg-gray-200 rounded-full text-sm"
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+
+            {/* Github Link */}
+            {item.properties.Github?.url && (
+              <a
+                href={item.properties.Github.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                GitHub Repository
+              </a>
+            )}
           </div>
         </div>
       ))}

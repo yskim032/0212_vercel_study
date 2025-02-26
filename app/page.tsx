@@ -127,13 +127,16 @@ export default async function Home() {
       </section>
 
       {/* Notion 데이터 섹션 추가 */}
-      <section className="text-gray-600 body-font">
+      <section className="text-gray-600 body-font dark:text-gray-400">
         <div className="container mx-auto px-5 py-24">
-          <h2 className="text-3xl font-bold text-center mb-8">Notion Data (Experimental)</h2>
-          <NotionData data={data as unknown as {
+          <h2 className="text-3xl font-bold text-center mb-8 text-primary">Portfolio</h2>
+          <NotionData data={data as {
             properties: {
               Name: NotionProperty & { type: 'title'; title: Array<{ plain_text: string }> };
               Description: NotionProperty & { type: 'rich_text'; rich_text: Array<{ plain_text: string }> };
+              Github: NotionProperty & { type: 'url'; url: string | null };
+              Tag: NotionProperty & { type: 'multi_select'; multi_select: Array<{ name: string }> };
+              WorkPeriod: NotionProperty & { type: 'date'; date: { start: string; end: string | null } };
               [key: string]: NotionProperty;
             };
             cover?: {

@@ -20,14 +20,16 @@ export default function Header() {
               </a>
               <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
                
-                <Link href="/" className="mr-5 hover:text-gray-900 dark:hover:text-yellow-500">Home</Link>
+                <Link href="/" className="mr-5 hover:text-gray-100 
+                dark:text-gray-400
+                dark:hover:text-yellow-500">Home</Link>
 
-                <Link href="/Project" className="mr-5 hover:text-gray-900 dark:hover:text-yellow-500">Project</Link>
+                <Link href="/Project" className="mr-5 hover:text-gray-900 dark:text-gray-400 dark:hover:text-yellow-500">Project</Link>
 
-                <Link href="/Android_Tester" className="mr-5 hover:text-gray-900 dark:hover:text-yellow-500">Android Tester</Link>
+                <Link href="/Android_Tester" className="mr-5 hover:text-gray-900 dark:text-gray-400 dark:hover:text-yellow-500">Android Tester</Link>
        
-                <Link href="/app_solution" className="mr-5 hover:text-gray-900 dark:hover:text-yellow-500">App_solution</Link>
-                <Link href="/WEB" className="mr-5 hover:text-gray-900 dark:hover:text-yellow-500">WEB</Link>
+                <Link href="/app_solution" className="mr-5 hover:text-gray-900 dark:text-gray-400 dark:hover:text-yellow-500">App_solution</Link>
+                <Link href="/WEB" className="mr-5 hover:text-gray-900 dark:text-gray-400 dark:hover:text-yellow-500">WEB</Link>
               </nav>
 
                 {/* 버튼작업공간 */}
