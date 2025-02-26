@@ -31,8 +31,6 @@ interface SerializedNotionPage {
   } | null;
 }
 
-type NotionProperties = Record<string, NotionProperty>;
-
 async function getNotionData(): Promise<SerializedNotionPage[]> {
   try {
     const notion = new Client({
