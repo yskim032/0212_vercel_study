@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+'use client'; // 이 주석을 추가합니다.  
 
 interface NotionProperty {
   type: string;
@@ -41,23 +39,19 @@ export default function NotionData({ data }: { data: NotionPage[] }) {
     }
   };
 
-  const renderProperties = (results: NotionPage[]) => {
-    return results.map((page, index) => (
-      <div key={index} className="border p-4 mb-4 rounded-lg">
-        {Object.entries(page.properties).map(([key, property], propIndex) => (
-          <div key={propIndex} className="mb-2">
-            <span className="font-bold">{key}: </span>
-            <span>{extractValue(property)}</span>
-          </div>
-        ))}
-      </div>
-    ));
-  };
-
   return (
     <div className="container mx-auto p-4">
-      {/* <h1 className="text-2xl font-bold mb-4">Notion Data</h1> */}
-      {renderProperties(data)}
+      <h1 className="text-2xl font-bold mb-4">Notion Data</h1>
+      {data.map((page, index) => (
+        <div key={index} className="border p-4 mb-4 rounded-lg">
+          {Object.entries(page.properties).map(([key, property], propIndex) => (
+            <div key={propIndex} className="mb-2">
+              <span className="font-bold">{key}: </span>
+              <span>{extractValue(property)}</span>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 } 
