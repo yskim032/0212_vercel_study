@@ -9,7 +9,14 @@ import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 interface NotionPropertyValue {
   type: string;
-  [key: string]: any; // 다양한 프로퍼티 타입을 허용
+  title?: Array<{ plain_text: string }>;
+  rich_text?: Array<{ plain_text: string }>;
+  number?: number;
+  select?: { name: string };
+  multi_select?: Array<{ name: string }>;
+  date?: { start: string };
+  checkbox?: boolean;
+  [key: string]: unknown; // any 대신 unknown 사용
 }
 
 interface NotionProperty {
@@ -54,7 +61,7 @@ async function getNotionData() {
 
     const serializedData: SerializedNotionPage[] = pages.map(page => ({
       properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
-        const typedProp = prop as NotionPropertyValue;
+        const typedProp = prop as any;
         
         acc[key] = {
           type: typedProp.type,
@@ -62,7 +69,7 @@ async function getNotionData() {
             title: typedProp.title?.map((t: NotionTextContent) => ({ plain_text: t.plain_text }))
           }),
           ...(typedProp.type === 'rich_text' && { 
-            rich_text: typedProp.rich_text?.map((t: NotionTextContent) => ({ plain_text: t.plain_text }))
+            rich_text: typedProp.rich_text?.map((t: NotionTextContent)    => ({ plain_text: t.plain_text }))
           }),
           ...(typedProp.type === 'number' && { 
             number: typedProp.number
