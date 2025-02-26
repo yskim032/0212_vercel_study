@@ -1,4 +1,4 @@
-'use client'; // 이 주석을 추가합니다.  
+'use client';
 
 import Image from 'next/image';
 
@@ -14,6 +14,14 @@ interface NotionProperty {
 interface NotionDataProps {
   data: {
     properties: {
+      Name: NotionProperty & {
+        type: 'title';
+        title: Array<{ plain_text: string }>;
+      };
+      Description: NotionProperty & {
+        type: 'rich_text';
+        rich_text: Array<{ plain_text: string }>;
+      };
       [key: string]: NotionProperty;
     };
     cover?: {
@@ -30,10 +38,9 @@ export default function NotionData({ data }: NotionDataProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.map((item, index) => (
         <div key={index} className="border rounded-lg overflow-hidden shadow-lg">
-          {/* Cover Image */}
-          {item.cover && item.cover.type === 'external' && (
+          {item.cover?.type === 'external' && (
             <div className="relative w-full h-48">
-              <Image
+              <Image 
                 src={item.cover.external.url}
                 alt="Project Cover"
                 fill
@@ -42,14 +49,12 @@ export default function NotionData({ data }: NotionDataProps) {
               />
             </div>
           )}
-          
-          {/* Content */}
           <div className="p-4">
             <h3 className="text-lg font-bold mb-2">
-              {item.properties.Name?.title?.[0]?.plain_text || 'Untitled'}
+              {item.properties.Name?.title[0]?.plain_text || 'Untitled'}
             </h3>
             <p className="text-gray-600">
-              {item.properties.Description?.rich_text?.[0]?.plain_text || 'No description'}
+              {item.properties.Description?.rich_text[0]?.plain_text || 'No description'}
             </p>
           </div>
         </div>

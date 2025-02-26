@@ -11,6 +11,12 @@ const nextConfig = {
       },
     ],
   },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
   /* config options here */
 };
 

@@ -46,8 +46,8 @@ async function getNotionData(): Promise<SerializedNotionPage[]> {
       'properties' in page && page.object === 'page'
     );
 
-    return pages.map(page => ({
-      properties: Object.entries(page.properties).reduce((acc, [key, prop]) => {
+    return pages.map(page => {
+      const properties = Object.entries(page.properties).reduce((acc, [key, prop]) => {
         const typedProp = prop as NotionProperty;
         
         const propertyValue = {
@@ -77,12 +77,30 @@ async function getNotionData(): Promise<SerializedNotionPage[]> {
 
         acc[key] = propertyValue as NotionProperty;
         return acc;
-      }, {} as Record<string, NotionProperty>),
-      cover: page.cover?.type === 'external' ? {
-        type: 'external',
-        external: { url: page.cover.external.url }
-      } : null
-    }));
+      }, {} as SerializedNotionPage['properties']);
+
+      // Name과 Description이 없는 경우 기본값 추가
+      if (!properties.Name?.title) {
+        properties.Name = {
+          type: 'title',
+          title: [{ plain_text: 'Untitled' }]
+        } as NotionProperty;
+      }
+      if (!properties.Description?.rich_text) {
+        properties.Description = {
+          type: 'rich_text',
+          rich_text: [{ plain_text: 'No description' }]
+        } as NotionProperty;
+      }
+
+      return {
+        properties,
+        cover: page.cover?.type === 'external' ? {
+          type: 'external',
+          external: { url: page.cover.external.url }
+        } : null
+      };
+    });
 
   } catch (error) {
     console.error('Error fetching Notion data:', error);
@@ -112,13 +130,7 @@ export default async function Home() {
       <section className="text-gray-600 body-font">
         <div className="container mx-auto px-5 py-24">
           <h2 className="text-3xl font-bold text-center mb-8">Notion Data (Experimental)</h2>
-          <NotionData data={data.map(page => ({
-            properties: page.properties,
-            cover: page.cover?.type === 'external' ? {
-              type: 'external',
-              external: { url: page.cover.external.url }
-            } : null
-          }))} />
+          <NotionData data={data as any} />
         </div>
       </section>
 
