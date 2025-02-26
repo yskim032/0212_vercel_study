@@ -7,18 +7,6 @@ import { Client } from '@notionhq/client';
 import NotionData from './component/NotionData';
 import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-interface NotionPropertyValue {
-  type: string;
-  title?: Array<{ plain_text: string }>;
-  rich_text?: Array<{ plain_text: string }>;
-  number?: number;
-  select?: { name: string };
-  multi_select?: Array<{ name: string }>;
-  date?: { start: string };
-  checkbox?: boolean;
-  [key: string]: unknown; // any 대신 unknown 사용
-}
-
 interface NotionProperty {
   type: string;
   title?: Array<{ plain_text: string }>;
@@ -31,18 +19,10 @@ interface NotionProperty {
 }
 
 interface SerializedNotionPage {
-  properties: {
-    [key: string]: NotionProperty;
-  };
+  properties: Record<string, NotionProperty>;
 }
 
-interface NotionTextContent {
-  plain_text: string;
-}
-
-interface NotionSelectOption {
-  name: string;
-}
+type NotionProperties = Record<string, NotionProperty>;
 
 async function getNotionData() {
   try {
@@ -60,16 +40,16 @@ async function getNotionData() {
     );
 
     const serializedData: SerializedNotionPage[] = pages.map(page => ({
-      properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
-        const typedProp = prop as any;
+      properties: Object.entries(page.properties).reduce<NotionProperties>((acc, [key, prop]) => {
+        const typedProp = prop as NotionProperty;
         
-        acc[key] = {
+        const propertyValue = {
           type: typedProp.type,
           ...(typedProp.type === 'title' && { 
-            title: typedProp.title?.map((t: NotionTextContent) => ({ plain_text: t.plain_text }))
+            title: typedProp.title?.map(t => ({ plain_text: t.plain_text }))
           }),
           ...(typedProp.type === 'rich_text' && { 
-            rich_text: typedProp.rich_text?.map((t: NotionTextContent)    => ({ plain_text: t.plain_text }))
+            rich_text: typedProp.rich_text?.map(t => ({ plain_text: t.plain_text }))
           }),
           ...(typedProp.type === 'number' && { 
             number: typedProp.number
@@ -78,7 +58,7 @@ async function getNotionData() {
             select: { name: typedProp.select?.name }
           }),
           ...(typedProp.type === 'multi_select' && { 
-            multi_select: typedProp.multi_select?.map((s: NotionSelectOption) => ({ name: s.name }))
+            multi_select: typedProp.multi_select?.map(s => ({ name: s.name }))
           }),
           ...(typedProp.type === 'date' && { 
             date: { start: typedProp.date?.start }
@@ -87,6 +67,8 @@ async function getNotionData() {
             checkbox: typedProp.checkbox
           })
         };
+
+        acc[key] = propertyValue as NotionProperty;
         return acc;
       }, {})
     }));
