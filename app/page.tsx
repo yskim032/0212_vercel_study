@@ -5,15 +5,20 @@ import Hero from "./component/home/hero";
 import Animation from "./component/home/animation";
 import { Client } from '@notionhq/client';
 import NotionData from './component/NotionData';
-import { DatabaseObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+
+interface NotionPropertyValue {
+  type: string;
+  [key: string]: any; // 다양한 프로퍼티 타입을 허용
+}
 
 interface NotionProperty {
   type: string;
-  title?: { plain_text: string }[];
-  rich_text?: { plain_text: string }[];
+  title?: Array<{ plain_text: string }>;
+  rich_text?: Array<{ plain_text: string }>;
   number?: number;
   select?: { name: string };
-  multi_select?: { name: string }[];
+  multi_select?: Array<{ name: string }>;
   date?: { start: string };
   checkbox?: boolean;
 }
@@ -22,6 +27,14 @@ interface SerializedNotionPage {
   properties: {
     [key: string]: NotionProperty;
   };
+}
+
+interface NotionTextContent {
+  plain_text: string;
+}
+
+interface NotionSelectOption {
+  name: string;
 }
 
 async function getNotionData() {
@@ -40,29 +53,31 @@ async function getNotionData() {
     );
 
     const serializedData: SerializedNotionPage[] = pages.map(page => ({
-      properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]: [string, any]) => {
+      properties: Object.entries(page.properties).reduce<Record<string, NotionProperty>>((acc, [key, prop]) => {
+        const typedProp = prop as NotionPropertyValue;
+        
         acc[key] = {
-          type: prop.type,
-          ...(prop.type === 'title' && { 
-            title: prop.title?.map((t: any) => ({ plain_text: t.plain_text })) 
+          type: typedProp.type,
+          ...(typedProp.type === 'title' && { 
+            title: typedProp.title?.map((t: NotionTextContent) => ({ plain_text: t.plain_text }))
           }),
-          ...(prop.type === 'rich_text' && { 
-            rich_text: prop.rich_text?.map((t: any) => ({ plain_text: t.plain_text })) 
+          ...(typedProp.type === 'rich_text' && { 
+            rich_text: typedProp.rich_text?.map((t: NotionTextContent) => ({ plain_text: t.plain_text }))
           }),
-          ...(prop.type === 'number' && { 
-            number: prop.number 
+          ...(typedProp.type === 'number' && { 
+            number: typedProp.number
           }),
-          ...(prop.type === 'select' && { 
-            select: { name: prop.select?.name } 
+          ...(typedProp.type === 'select' && { 
+            select: { name: typedProp.select?.name }
           }),
-          ...(prop.type === 'multi_select' && { 
-            multi_select: prop.multi_select?.map((s: any) => ({ name: s.name })) 
+          ...(typedProp.type === 'multi_select' && { 
+            multi_select: typedProp.multi_select?.map((s: NotionSelectOption) => ({ name: s.name }))
           }),
-          ...(prop.type === 'date' && { 
-            date: { start: prop.date?.start } 
+          ...(typedProp.type === 'date' && { 
+            date: { start: typedProp.date?.start }
           }),
-          ...(prop.type === 'checkbox' && { 
-            checkbox: prop.checkbox 
+          ...(typedProp.type === 'checkbox' && { 
+            checkbox: typedProp.checkbox
           })
         };
         return acc;
