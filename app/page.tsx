@@ -20,6 +20,12 @@ interface NotionProperty {
 
 interface SerializedNotionPage {
   properties: Record<string, NotionProperty>;
+  cover?: {
+    type: 'external';
+    external: {
+      url: string;
+    };
+  } | null;
 }
 
 type NotionProperties = Record<string, NotionProperty>;
@@ -70,7 +76,8 @@ async function getNotionData() {
 
         acc[key] = propertyValue as NotionProperty;
         return acc;
-      }, {})
+      }, {}),
+      cover: page.cover
     }));
 
     return serializedData;
@@ -110,4 +117,4 @@ export default async function Home() {
   );
 }
 
-// 13
+// 14
